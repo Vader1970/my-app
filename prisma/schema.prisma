@@ -1,0 +1,58 @@
+// This is your Prisma schema file defining the structure of your database models.
+
+// Generator configuration for Prisma client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Data source configuration, using SQLite in this case
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // Fetching database URL from environment variables
+}
+
+// Product model representing items available for purchase
+model Product {
+  id                      String    @id @default(uuid()) // Unique identifier for each product
+  name                    String    // Name of the product
+  priceInCents            Int       // Price of the product in cents
+  filePath                String    // Path to file associated with the product (if any)
+  imagePath               String    // Path to image associated with the product (if any)
+  description             String    // Description of the product
+  isAvailableForPurchase  Boolean   @default(true) // Flag indicating whether the product is available for purchase
+  createdAt               DateTime  @default(now()) // Timestamp for creation of the product
+  updatedAt               DateTime  @updatedAt // Timestamp for last update of the product
+  orders                  Order[]   // Relationship with orders associated with this product
+  DownloadVerifications   DownloadVerification[] // Relationship with download verifications associated with this product
+}
+
+// User model representing users of the e-commerce platform
+model User {
+  id                      String    @id @default(uuid()) // Unique identifier for each user
+  email                   String    @unique // Unique email address for each user
+  createdAt               DateTime  @default(now()) // Timestamp for creation of the user
+  updatedAt               DateTime  @updatedAt // Timestamp for last update of the user
+  orders                  Order[]   // Relationship with orders placed by this user
+}
+
+// Order model representing orders placed by users
+model Order {
+  id                String    @id @default(uuid()) // Unique identifier for each order
+  pricePaidInCents  Int       // Total price of the order in cents
+  createdAt         DateTime  @default(now()) // Timestamp for creation of the order
+  updatedAt         DateTime  @updatedAt // Timestamp for last update of the order
+
+  userId            String    // Foreign key referencing the user who placed the order
+  productId         String    // Foreign key referencing the product in the order
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade) // Relationship with the user who placed the order
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Restrict) // Relationship with the product in the order
+}
+
+// DownloadVerification model representing verifications for product downloads
+model DownloadVerification {
+  id              String    @id @default(uuid()) // Unique identifier for each download verification
+  expiresAt       DateTime  // Timestamp indicating expiration of the download verification
+  createdAt       DateTime  @default(now()) // Timestamp for creation of the download verification
+  productId       String    // Foreign key referencing the product associated with this verification
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade) // Relationship with the product associated with this verification
+}
