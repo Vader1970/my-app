@@ -1,5 +1,8 @@
 import { Nav, NavLink } from "@/components/Nav";
 
+// Force nextjs not to cache any of our admin pages for up to date and recent information there is
+export const dynamic = "force-dynamic";
+
 // AdminLayout component defines the layout structure for the admin section of the website
 export default function AdminLayout({
   children,
